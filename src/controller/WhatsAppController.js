@@ -41,7 +41,7 @@ class WhatsAppController{
 
         })
 
-        this.el.inputNameEditProfile.on('keypress', e=>{
+        this.el.inputNamePanelEditProfile.on('keypress', e=>{
 
             if(e.key==='Enter'){
 
@@ -54,7 +54,7 @@ class WhatsAppController{
 
         this.el.btnSavePanelEditProfile.on('click', e=>{
 
-
+            console.log(this.el.inputNamePanelEditProfile.innerHTML);
 
         })
 
@@ -84,6 +84,19 @@ class WhatsAppController{
         this.el.btnClosePanelAddContact.on('click', e=>{
 
             this.el.panelAddContact.removeClass('open');
+
+        })
+
+        this.el.contactsMessagesList.querySelectorAll('.contact-item').forEach(item=>{
+
+            item.on('click', e=>{
+
+                this.el.home.hide();
+                this.el.main.css({
+                    display:'flex'
+                })
+
+            })
 
         })
 
@@ -193,6 +206,7 @@ class WhatsAppController{
             });
 
             return json;
+
         }
     }
 
