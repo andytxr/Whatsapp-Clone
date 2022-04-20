@@ -208,6 +208,8 @@ class WhatsAppController{
             this.el.panelCamera.css({
                 height:'500px'
             })
+
+            this._camera = new CameraController(this.el.videoCamera);
             
         })
 
