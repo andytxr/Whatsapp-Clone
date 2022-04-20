@@ -190,6 +190,27 @@ class WhatsAppController{
 
         })
 
+        //Áudio
+
+        this.el.btnSendMicrophone.on('click', e=>{
+
+            this.el.recordMicrophone.show();
+            this.el.btnSendMicrophone.hide();
+            this.recordMicrophoneTimer();
+
+        })
+
+        this.el.btnCancelMicrophone.on('click', e=>{
+
+            this.closeRecordMicrophone();
+
+        })
+
+        this.el.btnFinishMicrophone.on('click', e=>{
+
+            this.closeRecordMicrophone();
+
+        })
 
     }
 
@@ -303,6 +324,14 @@ class WhatsAppController{
 
     //Funcionalidades do Displays the
 
+    closeMainPanel(){
+
+        this.el.panelMessagesContainer.hide();
+        this.el.panelDocumentPreview.removeClass('open');
+        this.el.panelCamera.removeClass('open');
+
+    }
+
     closeLeftPanels(){
 
         this.el.panelAddContact.hide();
@@ -317,12 +346,23 @@ class WhatsAppController{
 
     }
 
-    closeMainPanel(){
+    closeRecordMicrophone(){
 
-        this.el.panelMessagesContainer.hide();
-        this.el.panelDocumentPreview.removeClass('open');
-        this.el.panelCamera.removeClass('open');
+        this.el.recordMicrophone.hide();
+        this.el.btnSendMicrophone.show();
+        clearInterval(this._recordMicrophoneInterval);
 
+    }
+
+    recordMicrophoneTimer(){
+
+        let start = Date.now();
+        
+        this._recordMicrophoneInterval = setInterval(() => {
+            
+            this.el.recordMicrophoneTimer.innerHTML = Format.toTime((Date.now() - start));
+
+        }, 100)
 
     }
 
