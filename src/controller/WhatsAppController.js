@@ -13,7 +13,7 @@ class WhatsAppController{
 
         document.querySelectorAll('[id]').forEach(element=>{
 
-            this.el[Format.getCamelCase(element)]=element;
+            this.el[Format.getCamelCase(element.id)]=element;
 
         })
 
