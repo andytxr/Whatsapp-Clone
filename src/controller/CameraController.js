@@ -1,4 +1,4 @@
-class CameraController{
+export class CameraController{
 
     constructor(videoEl){
 
@@ -7,8 +7,7 @@ class CameraController{
             video:true
         }).then(stream=>{
 
-            let mediaStream = new MediaStream(stream);
-            this._videoEl.srcObject = mediaStream;
+            this._videoEl.srcObject = stream;
             this._videoEl.play();
 
         }).catch(err=>{
@@ -17,7 +16,5 @@ class CameraController{
 
         })
     }
-
-
 
 }

@@ -1,4 +1,7 @@
-class WhatsAppController{
+import {Format} from './../utils/Format.js'
+import {CameraController} from './CameraController.js'
+
+export class WhatsAppController{
 
     constructor(){
 
@@ -248,6 +251,7 @@ class WhatsAppController{
             this.el.panelDocumentPreview.css({
                 height:'500px'
             })
+
         })
 
         this.el.btnClosePanelDocumentPreview.on('click', e=>{
