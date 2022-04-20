@@ -100,6 +100,97 @@ class WhatsAppController{
 
         })
 
+        //Eventos da tela de conversação
+
+        this.el.btnAttach.on('click', e=>{
+
+            e.stopPropagation();
+            this.el.menuAttach.addClass('open');
+            document.addEventListener('click', this.closeMenuAttach.bind(this))
+            
+        })
+
+        //Camera
+
+        this.el.btnAttachCamera.on('click', e=>{
+
+            this.closeMainPanel();
+            this.el.panelCamera.addClass('open');
+            this.el.panelCamera.css({
+                height:'500px'
+            })
+            
+        })
+
+        this.el.btnClosePanelCamera.on('click', e=>{
+
+            this.closeMainPanel();
+            this.el.panelMessagesContainer.show();
+
+        })
+
+        this.el.btnTakePicture.on('click', e=>{
+
+            console.log('take picture')
+
+        })
+
+        //Contatos
+
+        this.el.btnAttachContact.on('click', e=>{
+
+            this.el.modalContacts.show();
+            
+        })
+
+        this.el.btnCloseModalContacts.on('click', e=>{
+
+            this.el.modalContacts.hide();
+        })
+
+        //Documentos
+
+        this.el.btnAttachDocument.on('click', e=>{
+
+            this.closeMainPanel();
+            this.el.panelDocumentPreview.addClass('open');
+            this.el.panelDocumentPreview.css({
+                height:'500px'
+            })
+        })
+
+        this.el.btnClosePanelDocumentPreview.on('click', e=>{
+
+            this.closeMainPanel();
+            this.el.panelMessagesContainer.show();
+
+        })
+
+        this.el.btnSendDocument.on('click', e=>{
+
+            console.log('Send document');
+
+        })
+
+        //Fotos
+
+        this.el.btnAttachPhoto.on('click', e=>{
+
+            this.el.inputPhoto.click()
+
+        })
+
+        this.el.inputPhoto.on('change', e=>{
+
+            [...this.el.inputPhoto.files].forEach(file=>{
+
+                console.log(file);
+
+            })
+
+        })
+
+
     }
 
     //Iniciando elementos 
@@ -216,6 +307,22 @@ class WhatsAppController{
 
         this.el.panelAddContact.hide();
         this.el.panelEditProfile.hide();
+
+    }
+
+    closeMenuAttach(e){
+
+        document.removeEventListener('click', this.closeMenuAttach)
+        this.el.menuAttach.removeClass('open');
+
+    }
+
+    closeMainPanel(){
+
+        this.el.panelMessagesContainer.hide();
+        this.el.panelDocumentPreview.removeClass('open');
+        this.el.panelCamera.removeClass('open');
+
 
     }
 
