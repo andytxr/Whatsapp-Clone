@@ -102,6 +102,63 @@ class WhatsAppController{
 
         //Eventos da tela de conversação
 
+        //Entrada de Texto
+
+        this.el.inputText.on('keyup', e=>{
+
+            if(this.el.inputText.innerHTML.length){
+
+                this.el.inputPlaceholder.hide();
+                this.el.btnSendMicrophone.hide();
+                this.el.btnSend.show();
+
+            }else{
+
+                this.el.inputPlaceholder.show();
+                this.el.btnSendMicrophone.show();
+                this.el.btnSend.hide();
+            }
+
+        })
+
+        this.el.inputText.on('keypress', e=>{
+
+            if(e.key==='Enter' && !e.ctrlKey && !e.shiftKey){
+
+                e.preventDefault();
+
+                this.el.btnSend.click();
+
+            }
+
+        })
+
+        this.el.btnSend.on('click', e=>{
+
+            console.log(this.el.inputText.innerHTML);
+
+        })
+
+        //Emoji
+
+        this.el.btnEmojis.on('click', e=>{
+
+            this.el.panelEmojis.toggleClass('open');
+
+        })
+        
+        this.el.panelEmojis.querySelectorAll('.emojik').forEach(emoji=>{
+
+            emoji.on('click', e=>{
+
+                console.log(emoji.dataset.unicode)
+
+;            })
+
+        })
+
+        //Anexo
+
         this.el.btnAttach.on('click', e=>{
 
             e.stopPropagation();
@@ -322,7 +379,7 @@ class WhatsAppController{
         }
     }
 
-    //Funcionalidades do Displays the
+    //Funcionalidades do Display
 
     closeMainPanel(){
 
