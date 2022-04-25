@@ -1,5 +1,6 @@
 const firebase = require('firebase')
 require('firebase/firestore');
+require('firebase/auth')
 
 export class Firebase{
 
@@ -23,13 +24,39 @@ export class Firebase{
 
     init(){
 []
-        if(!this._initialized){
+        if(!window._initializedFb){
 
             firebase.initializeApp(this._config);
             firebase.firestore().settings({})
-            this._initialized=true;
+            window._initializedFb=true;
 
         } 
+
+    }
+
+    initAuth() {
+
+        return new Promise((s,f) =>{
+
+            let provider = new firebase.auth.GoogleAuthProvider();
+
+            firebase.auth().signInWithPopup(provider).then(result =>{
+
+                let token = result.credential.accessToken;
+                let user = result.user;
+                
+                s({
+                    user,
+                    token
+                });
+
+            }).catch(err =>{
+
+                f(err)
+
+            })
+
+        })
 
     }
 
