@@ -81,6 +81,7 @@ export class MicrophoneController extends ClassEvent{
             });
 
             this._mediaRec.start();
+            this.recordMicrophoneTimer();
 
         }
 
@@ -92,12 +93,13 @@ export class MicrophoneController extends ClassEvent{
 
             this._mediaRec.stop();
             this.stopMicrophone();
+            this.stopRecordMicrophoneTimer();
 
         }
 
     }
 
-    //Eventos
+    //Iniciando funcionalidades
 
     stopMicrophone(){
 
@@ -112,6 +114,25 @@ export class MicrophoneController extends ClassEvent{
     isAvailable(){
 
         return this._available
+
+    }
+
+    recordMicrophoneTimer(){
+
+        let start = Date.now();
+        
+        this._recordMicrophoneInterval = setInterval(() => {
+            
+          this.trigger('rectime', (Date.now() - start));
+
+        }, 100)
+
+    }
+
+    
+    stopRecordMicrophoneTimer(){
+
+        clearInterval(this._recordMicrophoneInterval);
 
     }
 

@@ -2,6 +2,7 @@ import {Format} from './../utils/Format.js'
 import {CameraController} from './CameraController.js'
 import {MicrophoneController} from './MicrophoneController.js'
 import {DocumentPreviewController} from './DocumentPreviewController.js'
+import { Firebase } from './../utils/Firebase.js'
 
 export class WhatsAppController{
 
@@ -392,7 +393,6 @@ export class WhatsAppController{
 
             this.el.recordMicrophone.show();
             this.el.btnSendMicrophone.hide();
-            this.recordMicrophoneTimer();
 
             this._microphone=new MicrophoneController();
             
@@ -403,6 +403,11 @@ export class WhatsAppController{
 
             })
 
+            this._microphone.on('rectimer', timer=>{
+
+                this.el.recordMicrophoneTimer.innerHTML = Format.toTime(timer);
+
+            })
         })
 
         this.el.btnCancelMicrophone.on('click', e=>{
@@ -557,19 +562,6 @@ export class WhatsAppController{
 
         this.el.recordMicrophone.hide();
         this.el.btnSendMicrophone.show();
-        clearInterval(this._recordMicrophoneInterval);
-
-    }
-
-    recordMicrophoneTimer(){
-
-        let start = Date.now();
-        
-        this._recordMicrophoneInterval = setInterval(() => {
-            
-            this.el.recordMicrophoneTimer.innerHTML = Format.toTime((Date.now() - start));
-
-        }, 100)
 
     }
 
