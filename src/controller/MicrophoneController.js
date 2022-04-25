@@ -1,18 +1,23 @@
-export class MicrophoneController{
+import{ClassEvent} from "../utils/ClassEvent.js";
 
-    constructor(audioEl){
+export class MicrophoneController extends ClassEvent{
 
-        this._audioEl = audioEl;
+    constructor(){
+
+        super();
+
+        this._available = false;
+        this._mimeType = 'audio/webm';
 
         navigator.mediaDevices.getUserMedia({
             audio:true
         }).then(stream=>{
 
+            this._available = true;
+
             this._stream = stream;
 
-            let audio = new Audio();
-            audio.srcObject=stream;
-            audio.play();
+            this.trigger('ready', this._stream);
         
         }).catch(err=>{
 
@@ -21,6 +26,78 @@ export class MicrophoneController{
         })
 
     }
+
+    //Gravação
+
+    startRecorder(){
+
+        if(this.isAvailable()){
+
+            this._mediaRec = new MediaRecorder(this._stream, {
+                
+                mimeType: this._mimeType
+
+            })
+
+            this._recordedParts = [];
+
+            this._mediaRec.addEventListener('dataavailable', e=>{
+
+                if(e.data.size>0){
+
+                    this._recordedParts.push(e.data);
+
+                }
+
+            })
+
+            this._mediaRec.addEventListener('stop', e =>{
+
+                let blob = new Blob([this._recordedParts, {
+                    type:this._mimeType
+                }])
+                let filename = `rec${Date.now()}.webm`
+                let file = new File([blob], filename, {
+
+                    type: this._mimeType,
+                    lastModified: Date.now()
+
+                });
+                
+                console.log('chegamos no file', file);
+                
+                let reader = new FileReader();
+
+                reader.onload = e =>{
+
+                    console.log('chegamos no reader', file);
+
+                    let audio = new Audio(reader.result);
+                    audio.play();
+
+                }
+                reader.readAsDataURL(file);
+
+            });
+
+            this._mediaRec.start();
+
+        }
+
+    }
+
+    stopRecorder(){
+
+        if(this.isAvailable()){
+
+            this._mediaRec.stop();
+            this.stopMicrophone();
+
+        }
+
+    }
+
+    //Eventos
 
     stopMicrophone(){
 
@@ -32,5 +109,10 @@ export class MicrophoneController{
 
     }
 
+    isAvailable(){
+
+        return this._available
+
+    }
 
 }
