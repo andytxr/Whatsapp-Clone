@@ -18,6 +18,55 @@ export class WhatsAppController{
 
     }
 
+     //Autenticação
+
+     initAuth(){
+
+        this._firebase.initAuth().then(response=>{
+
+            this._user = new User(response.user.uid);
+
+            this._user.on('datachange', data=>{
+
+                    document.querySelector('title').innerHTML = data.name + ' - Whatsapp Clone'
+
+                    this.el.inputNamePanelEditProfile.innerHTML = data.name;
+                    if(data.photo){
+                        
+
+                        let photo = this.el.imgPanelEditProfile;
+                        photo.src = data.photo;
+                        photo.show();
+                        this.el.imgDefaultPanelEditProfile.hide();
+
+                        let photob = this.el.myPhoto.querySelector('img');
+                        photob.src = data.photo;
+                        photob.show();               
+
+                    }
+
+            });
+
+            this._user.name = response.user.displayName;
+            this._user.email = response.user.email;
+            this._user.photo = response.user.photoURL;
+
+            this._user.saveUser().then(()=>{
+
+                this.el.appContent.css({
+                    display: 'flex'
+                });
+
+            })
+
+        }).catch(err=>{
+
+            console.error(err);
+
+        })
+
+    }
+
     //Iniciando eventos
 
     initEvents(){
@@ -569,34 +618,5 @@ export class WhatsAppController{
 
     }
 
-    //Autenticação
-
-    initAuth(){
-
-        this._firebase.initAuth().then(response=>{
-
-            this._user = new User();
-            let userRef = User.idEmail(response.user.uid);
-            
-            userRef.set({
-
-                name: response.user.displayName,
-                email: response.user.uid,
-                photo: response.user.photoURL
-
-            }).then(()=>{
-
-                this.el.appContent.css({
-                    display: 'flex'
-                });
-
-            })
-
-        }).catch(err=>{
-
-            console.error(err);
-
-        })
-
-    }
+   
 }

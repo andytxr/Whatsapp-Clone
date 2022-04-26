@@ -1,11 +1,77 @@
 import {Firebase} from './../utils/Firebase.js';
-import {ClassEvent} from './../utils/ClassEvent.js';
+import {Model} from './Model.js'
 
-export class User extends ClassEvent{
+export class User extends Model{
+
+
+    constructor(id){
+
+        super();
+
+        if(id){
+
+            this.getId(id);
+
+        }
+
+    }
+
+    //Getters e Setter
+
+    get name(){
+
+        return this._data.name
+
+    }
+    set name(value){
+    
+        this._data.name=value;
+
+    }
+
+    get email(){
+
+        return this._data.email
+
+    }
+    set email(value){
+    
+        this._data.email=value;
+
+    }
+
+    get photo(){
+
+        return this._data.photo
+
+    }
+    set photo(value){
+    
+        this._data.photo=value;
+
+    }
+
+    //Identificação do usuário
 
     static getRef(){
 
         return Firebase.db().collection('/users')
+
+    }
+
+    getId(id){
+
+        return new Promise((s,f)=>{
+
+            User.idEmail(id).onSnapshot(doc =>{
+
+                this.fromJSON(doc.data())
+
+                s(doc)
+
+            })
+
+        });
 
     }
 
@@ -14,5 +80,14 @@ export class User extends ClassEvent{
         return User.getRef().doc(email);
 
     }
+
+    //Manipulação/Armazenamento de Dados
+
+    saveUser(){
+
+        return User.idEmail(this.email).set(this.toJSON());
+
+    }
+
 
 }
