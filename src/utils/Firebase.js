@@ -6,6 +6,7 @@ export class Firebase{
 
     constructor(){
 
+
         this._config = {
 
             apiKey: "AIzaSyCR77PEr7VfEq-Ji6a24IhZq-WL5FcNMso",

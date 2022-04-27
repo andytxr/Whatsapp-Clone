@@ -4,6 +4,8 @@ import {MicrophoneController} from './MicrophoneController.js'
 import {DocumentPreviewController} from './DocumentPreviewController.js'
 import {Firebase} from './../utils/Firebase.js'
 import {User} from './../models/User.js'
+import {Chat} from '../models/Chat.js'
+import {Message} from '../models/Message.js'
 
 export class WhatsAppController{
 
@@ -141,23 +143,8 @@ export class WhatsAppController{
 
                 div.on('click', e=>{
 
-                    this.el.activeName.innerHTML = contact.name;
-                    this.el.activeStatus.innerHTML = contact.status;
-
-                    if(contact.photo){
-
-                        let img = this.el.activePhoto;
-                        img.src = contact.photo;
-                        img.show();
-
-                    }
-
-                    this.el.home.hide();
-                    this.el.main.css({
-
-                        display:'flex'
-
-                    })
+                    console.log("chatId", contact.chatId);
+                    this.setActiveChat(contact);
 
                 })
 
@@ -236,12 +223,20 @@ export class WhatsAppController{
 
                 if(data.name){
 
-                    this._user.addContact(contact).then(()=>{
+                    Chat.createChat(this._user.email, contact.email).then(chat =>{
 
-                        this.el.btnClosePanelAddContact.click();
-                        console.info('The contact has been added with success');
+                        contact.chatId = chat.id;
+                        this._user.chatId - chat.id;
+                        contact.addContact(this._user);
 
-                    });
+                        this._user.addContact(contact).then(()=>{
+
+                            this.el.btnClosePanelAddContact.click();
+                            console.info('The contact has been added with success');
+    
+                        });
+
+                    })
                     
                 }else{
 
@@ -322,7 +317,9 @@ export class WhatsAppController{
 
         this.el.btnSend.on('click', e=>{
 
-            console.log(this.el.inputText.innerHTML);
+            Message.send(this._contactActive.chatId, this._user.email, 'text', this.el.inputText.innerHTML);
+            this.el.inputText.innerHTML='';
+            this.el.panelEmojis.removeClass('open');
 
         })
 
@@ -744,6 +741,30 @@ export class WhatsAppController{
         this.el.recordMicrophone.hide();
         this.el.btnSendMicrophone.show();
 
+    }
+
+    setActiveChat(contact){
+
+        this._contactActive = contact;
+
+        this.el.activeName.innerHTML = contact.name;
+        this.el.activeStatus.innerHTML = contact.status;
+
+        if(contact.photo){
+
+            let img = this.el.activePhoto;
+            img.src = contact.photo;
+            img.show();
+
+        }
+
+        this.el.home.hide();
+        this.el.main.css({
+
+            display:'flex'
+
+        })
+        
     }
 
    

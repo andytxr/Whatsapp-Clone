@@ -1,3 +1,4 @@
+import { Firebase } from "../utils/Firebase";
 import { Model } from "./Model";
 
 export class Message extends Model{
@@ -59,6 +60,12 @@ export class Message extends Model{
     }
 
     //Importando elementos
+
+    static getRef(chatId){
+
+        return Firebase.db().collection('chats').doc(chatId).collection('messages');
+
+    }
 
     getViewElement(me = true){
 
@@ -345,6 +352,20 @@ export class Message extends Model{
         let className = (me) ? 'message-out' : 'message-in';
 
         return div;
+
+    }
+
+    //Funcionalidades de Envio
+
+    static send(chatId, from, type, content){
+
+        return Message.getRef(chatId).add({
+            content,
+            timeStamp: new Date(),
+            status: wait,
+            type,
+            from
+        })
 
     }
 
