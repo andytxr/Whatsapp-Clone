@@ -26,7 +26,7 @@ export class WhatsAppController{
 
         this._firebase.initAuth().then(response=>{
 
-            this._user = new User(response.user.uid);
+            this._user = new User(response.user.email);
 
             this._user.on('datachange', data=>{
 
@@ -35,7 +35,6 @@ export class WhatsAppController{
                     this.el.inputNamePanelEditProfile.innerHTML = data.name;
                     if(data.photo){
                         
-
                         let photo = this.el.imgPanelEditProfile;
                         photo.src = data.photo;
                         photo.show();
@@ -218,7 +217,7 @@ export class WhatsAppController{
             let formData = new FormData(this.el.formPanelAddContact);
 
             let contact = new User(formData.get('email'))
-
+            console.log('contato', contact);
             contact.on('datachange', data =>{
 
                 if(data.name){
@@ -226,7 +225,7 @@ export class WhatsAppController{
                     Chat.createChat(this._user.email, contact.email).then(chat =>{
 
                         contact.chatId = chat.id;
-                        this._user.chatId - chat.id;
+                        this._user.chatId = chat.id;
                         contact.addContact(this._user);
 
                         this._user.addContact(contact).then(()=>{
@@ -245,6 +244,22 @@ export class WhatsAppController{
                 }
 
             })         
+
+        })
+
+        this.el.inputSearchContacts.on('keyup', e=>{
+
+            if(this.el.inputSearchContacts.value.length > 0){
+
+                this.el.inputSearchContactsPlaceholder.hide();
+
+            }else{
+
+                this.el.inputSearchContactsPlaceholder.show();
+
+            }
+
+            this._user.getContact(this.el.inputSearchContacts.value);
 
         })
 
@@ -745,6 +760,9 @@ export class WhatsAppController{
 
     setActiveChat(contact){
 
+        if (this._contactActive){
+            Message.getRef(this._contactActive.chatId).onSnapshot(()=>{})
+        }
         this._contactActive = contact;
 
         this.el.activeName.innerHTML = contact.name;
@@ -762,6 +780,47 @@ export class WhatsAppController{
         this.el.main.css({
 
             display:'flex'
+
+        });
+
+        this.el.panelMessagesContainer.innerHTML = '';
+
+        Message.getRef(this._contactActive.chatId).orderBy('timeStamp').onSnapshot(docs=>{
+
+            let scrollTop = this.el.panelMessagesContainer.scrollTop;
+            let scrollTopMax = (this.el.panelMessagesContainer.scrollHeight - this.el.panelMessagesContainer.offsetHeight);
+            let autoScroll = (scrollTop >= scrollTopMax);
+
+
+            docs.forEach(doc=>{
+
+                let data = doc.data();
+                data.id = doc.id;
+                
+
+                if(this.el.panelMessagesContainer.querySelector('#_' + data.id)){
+
+                    let message = new Message();
+                    message.fromJSON(data);
+
+                    let me = (data.from === this._user.email);
+
+                    let view = message.getViewElement(me);
+                    this.el.panelMessagesContainer.appendChild(view);
+
+                }
+                
+            })
+
+            if(autoScroll){
+
+                this.el.panelMessagesContainer.scrollTop = (this.el.panelMessagesContainer.scrollHeight - this.el.panelMessagesContainer.offsetHeight);
+
+            }else{
+
+                this.el.panelMessagesContainer.scrollTop = scrollTop;
+
+            }
 
         })
         

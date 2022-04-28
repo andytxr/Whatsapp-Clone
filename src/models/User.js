@@ -1,5 +1,5 @@
 import {Firebase} from './../utils/Firebase.js';
-import {Model} from './Model.js'
+import {Model} from './Model.js';
 
 export class User extends Model{
 
@@ -101,18 +101,18 @@ export class User extends Model{
 
     }
 
-    getContact(){
+    getContact(filter = ''){
 
         return new Promise((s,f)=>{
 
-            User.getContactRef(this.email).onSnapshot(docs =>{
+            User.getContactRef(this.email).where('name', '>=', filter).onSnapshot(docs =>{
 
                 let contacts = [];
 
                 docs.forEach(doc=>{
 
                     let data = doc.data();
-                    data.id=doc.id
+                    data.id=doc.uid
                     contacts.push(data);
 
                 })
