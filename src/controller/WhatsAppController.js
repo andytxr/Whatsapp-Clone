@@ -62,13 +62,13 @@ export class WhatsAppController{
                     display: 'flex'
                 });
 
-            })
+            });
 
         }).catch(err=>{
 
             console.error(err);
 
-        })
+        });
 
     }
 
@@ -147,12 +147,14 @@ export class WhatsAppController{
                     console.log("chatId", contact.chatId);
                     this.setActiveChat(contact);
 
-                })
-
+                });
+                
                 this.el.contactsMessagesList.appendChild(div);
-            })
+            
+            });
 
-        })
+        });
+
         this._user.getContact();
 
     }
@@ -174,19 +176,19 @@ export class WhatsAppController{
             },300)
 
             
-        })    
+        });  
 
         this.el.btnClosePanelEditProfile.on('click', e=>{
 
             this.el.panelEditProfile.removeClass('open');
 
-        })
+        });
 
         this.el.photoContainerEditProfile.on('click', e=>{
 
             this.el.inputProfilePhoto.click();
 
-        })
+        });
 
         this.el.inputNamePanelEditProfile.on('keypress', e=>{
 
@@ -195,9 +197,9 @@ export class WhatsAppController{
                 e.preventDefault();
                 this.el.btnSavePanelEditProfile.click();
 
-            }
+            };
 
-        })
+        });
 
         this.el.btnSavePanelEditProfile.on('click', e=>{
 
@@ -208,9 +210,9 @@ export class WhatsAppController{
 
                 this.el.btnSavePanelEditProfile.disabled=false;
             
-            })
+            });
 
-        })
+        });
 
         this.el.formPanelAddContact.on('submit', e=>{
 
@@ -237,7 +239,7 @@ export class WhatsAppController{
     
                         });
 
-                    })
+                    });
                     
                 }else{
 
@@ -245,9 +247,9 @@ export class WhatsAppController{
 
                 }
 
-            })         
+            });
 
-        })
+        });
 
         this.el.inputSearchContacts.on('keyup', e=>{
 
@@ -263,7 +265,7 @@ export class WhatsAppController{
 
             this._user.getContact(this.el.inputSearchContacts.value);
 
-        })
+        });
 
         //Eventos de contato
 
@@ -278,13 +280,13 @@ export class WhatsAppController{
 
             },300)
             
-        })
+        });
 
         this.el.btnClosePanelAddContact.on('click', e=>{
 
             this.el.panelAddContact.removeClass('open');
 
-        })
+        });
 
         this.el.contactsMessagesList.querySelectorAll('.contact-item').forEach(item=>{
 
@@ -293,11 +295,11 @@ export class WhatsAppController{
                 this.el.home.hide();
                 this.el.main.css({
                     display:'flex'
-                })
+                });
 
-            })
+            });
 
-        })
+        });
 
         //Eventos da tela de conversação
 
@@ -318,7 +320,7 @@ export class WhatsAppController{
                 this.el.btnSend.hide();
             }
 
-        })
+        });
 
         this.el.inputText.on('keypress', e=>{
 
@@ -330,7 +332,7 @@ export class WhatsAppController{
 
             }
 
-        })
+        });
 
         this.el.btnSend.on('click', e=>{
 
@@ -338,7 +340,7 @@ export class WhatsAppController{
             this.el.inputText.innerHTML='';
             this.el.panelEmojis.removeClass('open');
 
-        })
+        });
 
         //Emoji
 
@@ -346,7 +348,7 @@ export class WhatsAppController{
 
             this.el.panelEmojis.toggleClass('open');
 
-        })
+        });
         
         this.el.panelEmojis.querySelectorAll('.emojik').forEach(emoji=>{
 
@@ -364,7 +366,7 @@ export class WhatsAppController{
 
                     img.classList.add(name);
 
-                })
+                });
 
                 let cursor = window.getSelection();
                 if(!cursor.focusNode || !cursor.focusNode.id == 'input-text'){
@@ -386,9 +388,9 @@ export class WhatsAppController{
 
                 this.el.inputText.dispatchEvent(new Event('keyup'));
 
-            })
+            });
 
-        })
+        });
 
         //Anexo
 
@@ -398,7 +400,7 @@ export class WhatsAppController{
             this.el.menuAttach.addClass('open');
             document.addEventListener('click', this.closeMenuAttach.bind(this))
             
-        })
+        });
 
         //Camera
 
@@ -407,12 +409,14 @@ export class WhatsAppController{
             this.closeMainPanel();
             this.el.panelCamera.addClass('open');
             this.el.panelCamera.css({
+
                 height:'500px'
-            })
+
+            });
 
             this._camera = new CameraController(this.el.videoCamera);
             
-        })
+        });
 
         this.el.btnClosePanelCamera.on('click', e=>{
 
@@ -420,7 +424,7 @@ export class WhatsAppController{
             this.el.panelMessagesContainer.show();
             this._camera.stopCamera();
 
-        })
+        });
 
         this.el.btnTakePicture.on('click', e=>{
 
@@ -433,7 +437,7 @@ export class WhatsAppController{
             this.el.containerTakePicture.hide();
             this.el.containerSendPicture.show();
 
-        })
+        });
 
         this.el.btnReshootPanelCamera.on('click', e=>{
 
@@ -443,7 +447,7 @@ export class WhatsAppController{
             this.el.containerTakePicture.show();
             this.el.containerSendPicture.hide();
 
-        })
+        });
 
         this.el.btnSendPicture.on('click', e=>{
 
@@ -496,7 +500,7 @@ export class WhatsAppController{
 
             }
 
-        })
+        });
 
         //Contatos
 
@@ -507,17 +511,17 @@ export class WhatsAppController{
 
                 Message.sendContact(this._contactActive.chatId, this._user.email, contact);
 
-            })
+            });
             
             this._contact.openModal();
             
-        })
+        });
 
         this.el.btnCloseModalContacts.on('click', e=>{
 
             this._contact.closeModal()
 
-        })
+        });
 
         //Documentos
 
@@ -526,20 +530,24 @@ export class WhatsAppController{
             this.closeMainPanel();
             this.el.panelDocumentPreview.addClass('open');
             this.el.panelDocumentPreview.css({
+
                 height:'500px'
-            })
+
+            });
 
             this.el.inputDocument.click();
 
-        })
+        });
 
         this.el.inputDocument.on('change', e=>{
 
             if(this.el.inputDocument.files.length){
 
                 this.el.panelDocumentPreview.css({
+                    
                     height:'1%'
-                })
+                
+                });
 
                 let file=this.el.inputDocument.files[0];
                 this._documentPreviewController = new DocumentPreviewController(file);
@@ -602,14 +610,14 @@ export class WhatsAppController{
 
             }
 
-        })
+        });
 
         this.el.btnClosePanelDocumentPreview.on('click', e=>{
 
             this.closeMainPanel();
             this.el.panelMessagesContainer.show();
 
-        })
+        });
 
         this.el.btnSendDocument.on('click', e=>{
 
@@ -622,7 +630,6 @@ export class WhatsAppController{
 
                     Message.sendDocument(this._contactActive.id, this._user.email, file, filePreview, this.el.infoPanelDocumentPreview.innerHTML);
 
-
                 })
 
             }else{
@@ -633,7 +640,7 @@ export class WhatsAppController{
 
             this.el.btnClosePanelDocumentPreview.click();
 
-        })
+        });
 
         //Fotos
 
@@ -641,7 +648,7 @@ export class WhatsAppController{
 
             this.el.inputPhoto.click()
 
-        })
+        });
 
         this.el.inputPhoto.on('change', e=>{
 
@@ -649,9 +656,9 @@ export class WhatsAppController{
 
                 Message.sendImage(this._contactActive.chatId, this._user.email, file)
 
-            })
+            });
 
-        })
+        });
 
         //Áudio
 
@@ -667,28 +674,39 @@ export class WhatsAppController{
                 console.log('foi.');
                 this._microphone.startRecorder();
 
-            })
+            });
 
             this._microphone.on('rectimer', timer=>{
 
                 this.el.recordMicrophoneTimer.innerHTML = Format.toTime(timer);
 
-            })
-        })
+            });
+
+        });
 
         this.el.btnCancelMicrophone.on('click', e=>{
 
             this._microphone.stopRecorder();
             this.closeRecordMicrophone();
 
-        })
+        });
 
         this.el.btnFinishMicrophone.on('click', e=>{
+
+            this._microphone.on('recorded', e=>{
+
+                this._microphone.on('recorded', (file, metadata)=>{
+
+                    Message.sendAudio(this._contactActive.chatId, this._user.email, file, metadata, this._user.photo);
+
+                });
+
+            });
 
             this._microphone.stopRecorder();
             this.closeRecordMicrophone();
 
-        })
+        });
 
     }
 
@@ -702,7 +720,7 @@ export class WhatsAppController{
 
             this.el[Format.getCamelCase(element.id)]=element;
 
-        })
+        });
 
     }
 
@@ -784,7 +802,6 @@ export class WhatsAppController{
 
         }
 
-
         HTMLFormElement.prototype.toJSON=function(){
 
             let json = {};
@@ -798,6 +815,7 @@ export class WhatsAppController{
             return json;
 
         }
+
     }
 
     //Funcionalidades do Display
@@ -834,7 +852,9 @@ export class WhatsAppController{
     setActiveChat(contact){
 
         if (this._contactActive){
+
             Message.getRef(this._contactActive.chatId).onSnapshot(()=>{})
+
         }
         this._contactActive = contact;
 
@@ -874,6 +894,7 @@ export class WhatsAppController{
                 message.fromJSON(data);
 
                 let me = (data.from === this._user.email);
+                let view = message.getViewElement(me);
 
                 if(this.el.panelMessagesContainer.querySelector('#_' + data.id)){
 
@@ -891,13 +912,12 @@ export class WhatsAppController{
 
                     }
 
-                    let view = message.getViewElement(me);
                     this.el.panelMessagesContainer.appendChild(view);
 
                 }else {
 
-                    let view = message.getViewElement(me);
-                    this.el.panelMessagesContainer.querySelector('#_' + data.id).innerHTML = view.innerHTML;
+                    let parent = this.el.panelMessagesContainer.querySelector('#_' + data.id).parentNode;
+                    parent.replaceChild(view, this.el.panelMessagesContainer.querySelector('#_' + data.id).innerHTML);   
 
                 }
                 
@@ -908,8 +928,34 @@ export class WhatsAppController{
                     msgEl.querySelector('.message.status').innerHTML = message.getStatus().outerHTML;
 
                 }
+
+                if(message === 'contact'){
+
+                    view.querySelector('.btn-message-send').on('click', e=>{
+
+                        Chat.createChat(this._user.email, message.content.email).then(chat=>{
+
+                            let contact = new User(message.content.email);
+                            contact.on('datachange', data=>{
+
+                                contact.chatId=chat.id;
+                                this._user._data.addContact(contact);
+                                this._user.chatId=chat.id;
+    
+                                contact.addContact(this._user);
+    
+                                this._user.addContact(contact);
+                                this.setActiveChat(contact);
+    
+                            });
+                           
+                        });
+
+                    });
+
+                }
                 
-            })
+            });
 
             if(autoScroll){
 
@@ -921,7 +967,7 @@ export class WhatsAppController{
 
             }
 
-        })
+        });
         
     }
 

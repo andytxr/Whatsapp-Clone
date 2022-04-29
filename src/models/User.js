@@ -59,17 +59,17 @@ export class User extends Model{
 
     }
 
-    static getContactRef(id){
+    static getContactRef(uid){
 
-        return User.getRef().doc(id).collection('contacts');
+        return User.getRef().doc(uid).collection('contacts');
 
     }
 
-    getId(id){
+    getId(uid){
 
         return new Promise((s,f)=>{
 
-            User.idEmail(id).onSnapshot(doc =>{
+            User.idEmail(uid).onSnapshot(doc =>{
 
                 this.fromJSON(doc.data())
 
@@ -81,9 +81,9 @@ export class User extends Model{
 
     }
 
-    static idEmail(email){
+    static idEmail(uid){
 
-        return User.getRef().doc(email);
+        return User.getRef().doc(uid);
 
     }
 
