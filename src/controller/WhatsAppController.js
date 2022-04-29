@@ -1,8 +1,10 @@
-import {Format} from './../utils/Format.js'
 import {CameraController} from './CameraController.js'
-import {MicrophoneController} from './MicrophoneController.js'
 import {DocumentPreviewController} from './DocumentPreviewController.js'
+import { ContactController } from './ContactController.js'
+import {MicrophoneController} from './MicrophoneController.js'
 import {Firebase} from './../utils/Firebase.js'
+import {Format} from './../utils/Format.js'
+import {Base64 } from '../utils/Base64.js'
 import {User} from './../models/User.js'
 import {Chat} from '../models/Chat.js'
 import {Message} from '../models/Message.js'
@@ -500,13 +502,21 @@ export class WhatsAppController{
 
         this.el.btnAttachContact.on('click', e=>{
 
-            this.el.modalContacts.show();
+            this._contact = new ContactController(this.el.modalContacts, this._user);
+            this._contact.on('select', extract =>{
+
+                Message.sendContact(this._contactActive.chatId, this._user.email, contact);
+
+            })
+            
+            this._contact.openModal();
             
         })
 
         this.el.btnCloseModalContacts.on('click', e=>{
 
-            this.el.modalContacts.hide();
+            this._contact.closeModal()
+
         })
 
         //Documentos
@@ -606,7 +616,22 @@ export class WhatsAppController{
             let file = this.el.inputDocument.files[0];
             let base64 = this.el.imgPanelDocumentPreview
 
-            Message.sendDocument(this._contactActive.id, this._user.email, file, base64);
+            if(file.type === 'application/pdf'){
+
+                Base64.toFile(base64).then(filePreview =>{
+
+                    Message.sendDocument(this._contactActive.id, this._user.email, file, filePreview, this.el.infoPanelDocumentPreview.innerHTML);
+
+
+                })
+
+            }else{
+
+                Message.sendDocument(this._contactActive.id, this._user.email, file);
+
+            }
+
+            this.el.btnClosePanelDocumentPreview.click();
 
         })
 
@@ -869,11 +894,19 @@ export class WhatsAppController{
                     let view = message.getViewElement(me);
                     this.el.panelMessagesContainer.appendChild(view);
 
-                }else if(me){
+                }else {
+
+                    let view = message.getViewElement(me);
+                    this.el.panelMessagesContainer.querySelector('#_' + data.id).innerHTML = view.innerHTML;
+
+                }
+                
+                
+                if(this.el.panelMessagesContainer.querySelector('#_' + data.id) && me){
 
                     let msgEl = this.el.panelMessagesContainer.querySelector('#_' + data.id);
-
                     msgEl.querySelector('.message.status').innerHTML = message.getStatus().outerHTML;
+
                 }
                 
             })
