@@ -528,10 +528,11 @@ export class Message extends Model{
                      `;
         }
 
-        let className = 'message-in'
+        let className = 'message-out'
+        
         if(me){
 
-            className = 'message-out'
+            className = 'message-in'
             div.querySelector('.msg-time').parentElement.appendChild(this.getStatus());
 
         }
