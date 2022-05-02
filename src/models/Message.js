@@ -560,7 +560,7 @@ export class Message extends Model{
 
                 let docRef = result.parent.doc(result.id);
 
-                docRef.set({
+                docRef.add({
 
                     status: 'sent'
 
@@ -618,7 +618,7 @@ export class Message extends Model{
     
                         let downloadFilePreview = snapshotb.downloadURL;
     
-                        msgRef.set({
+                        msgRef.add({
     
                             content: downloadFile,
                             preview: downloadFilePreview,
@@ -627,6 +627,7 @@ export class Message extends Model{
                             fileType: file.type,
                             status: 'sent',
                             info
+
                         },{
     
                             merge: true
@@ -637,7 +638,7 @@ export class Message extends Model{
 
                 } else {
 
-                    msgRef.set({
+                    msgRef.add({
     
                         content: downloadFile,
                         fileName: file.name,
@@ -674,7 +675,7 @@ export class Message extends Model{
 
             });
 
-            msgRef.set({
+            msgRef.add({
 
                 content: downloadFile,
                 size: file.size,

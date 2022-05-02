@@ -54,8 +54,11 @@ export class MicrophoneController extends ClassEvent{
             this._mediaRec.addEventListener('stop', e =>{
 
                 let blob = new Blob([this._recordedParts, {
+
                     type:this._mimeType
+
                 }])
+
                 let filename = `rec${Date.now()}.webm`;
 
                 let audioContext = new AudioContext();
@@ -75,9 +78,10 @@ export class MicrophoneController extends ClassEvent{
 
                         this.trigger('recorded', file, decode);
 
-                    })
+                    });
 
                 }
+
                 reader.readAsArrayBuffer(blob);
 
             });

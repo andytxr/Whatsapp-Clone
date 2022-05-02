@@ -494,7 +494,7 @@ export class WhatsAppController{
 
             let regex = /^data:(.+);base64,(.*)$/;
             let res = this.el.pictureCamera.src.match(regex);
-            let mimeType = result[1];
+            let mimeType = res[1];
             let ext = mimeType.split("/")[1];
             let filename = `camera${Date.now()}.${ext}`
 
@@ -533,7 +533,6 @@ export class WhatsAppController{
                     this.el.containerSendPicture.hide();
                     this.el.containerTakePicture.show();
                     this.el.panelMessagesContainer.show();
-                    
     
                 });
 
@@ -548,7 +547,7 @@ export class WhatsAppController{
             this._contact = new ContactController(this.el.modalContacts, this._user);
             this._contact.on('select', extract =>{
 
-                Message.sendContact(this._contactActive.chatId, this._user.email, contact);
+                Message.sendContact(this._contactActive.chatId, this._user.uid, contact);
 
             });
             
@@ -667,13 +666,13 @@ export class WhatsAppController{
 
                 Base64.toFile(base64).then(filePreview =>{
 
-                    Message.sendDocument(this._contactActive.id, this._user.email, file, filePreview, this.el.infoPanelDocumentPreview.innerHTML);
+                    Message.sendDocument(this._contactActive.id, this._user.uid, file, filePreview, this.el.infoPanelDocumentPreview.innerHTML);
 
                 })
 
             }else{
 
-                Message.sendDocument(this._contactActive.id, this._user.email, file);
+                Message.sendDocument(this._contactActive.id, this._user.uld, file);
 
             }
 
@@ -693,7 +692,7 @@ export class WhatsAppController{
 
             [...this.el.inputPhoto.files].forEach(file=>{
 
-                Message.sendImage(this._contactActive.chatId, this._user.email, file)
+                Message.sendImage(this._contactActive.chatId, this._user.uid, file)
 
             });
 
@@ -736,7 +735,7 @@ export class WhatsAppController{
 
                 this._microphone.on('recorded', (file, metadata)=>{
 
-                    Message.sendAudio(this._contactActive.chatId, this._user.email, file, metadata, this._user.photo);
+                    Message.sendAudio(this._contactActive.chatId, this._user.uid, file, metadata, this._user.photo);
 
                 });
 
@@ -970,7 +969,7 @@ export class WhatsAppController{
                 if(message.type === 'contact') {
 
                     view.querySelector('.btn-message-send').on('click', e => {
-                        Chat.createIfNotExists(this._user.email, message.content.email).then(chat => {
+                        Chat.createIfNotExists(this._user.uid, message.content.email).then(chat => {
                             let contact = new User(message.content.email);
                             
                             contact.on('datachange', data => {
