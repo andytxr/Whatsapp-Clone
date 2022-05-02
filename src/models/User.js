@@ -40,6 +40,15 @@ export class User extends Model{
 
     }
 
+    get chatId(){
+
+        return this._data.chatId;
+    }
+    set chatId(value){
+        
+        return this._data.chatId = value;
+    }
+
     get photo(){
 
         return this._data.photo
@@ -59,17 +68,17 @@ export class User extends Model{
 
     }
 
-    static getContactRef(uid){
+    static getContactRef(id){
 
-        return User.getRef().doc(uid).collection('contacts');
+        return User.getRef().doc(id).collection('contacts');
 
     }
 
-    getId(uid){
+    getId(id){
 
         return new Promise((s,f)=>{
 
-            User.idEmail(uid).onSnapshot(doc =>{
+            User.idEmail(id).onSnapshot(doc =>{
 
                 this.fromJSON(doc.data())
 
@@ -81,9 +90,9 @@ export class User extends Model{
 
     }
 
-    static idEmail(uid){
+    static idEmail(id){
 
-        return User.getRef().doc(uid);
+        return User.getRef().doc(id);
 
     }
 
@@ -112,7 +121,7 @@ export class User extends Model{
                 docs.forEach(doc=>{
 
                     let data = doc.data();
-                    data.id=doc.uid
+                    data.id=doc.id
                     contacts.push(data);
 
                 })

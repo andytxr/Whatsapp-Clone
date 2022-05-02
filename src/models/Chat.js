@@ -17,7 +17,7 @@ export class Chat extends Model{
     }
     set users(value){
 
-        this._data.users;
+        this._data.users=value;
 
     }
 
@@ -35,15 +35,16 @@ export class Chat extends Model{
     //Importando elementos
 
     static getRef(){
+ 
+        return Firebase.db().collection('/chats');
 
-        return Firebase.db().collection('chats');
-    } 
+    }
 
     //Funcionalidade de criação do chat
 
     static find(myEmail, contactEmail){
 
-        return Chat.getRef().where(btoa(myEmail), '==', true).where(btoa(contactEmail), '==', true).get();
+        return Chat.getRef().where(btoa(myEmail), '==', 'true').where(btoa(contactEmail), '==', 'true').get();
 
     }
 

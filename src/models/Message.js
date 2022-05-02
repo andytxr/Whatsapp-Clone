@@ -1,6 +1,7 @@
 import { Firebase } from "../utils/Firebase";
 import { Model } from "./Model";
 import { Format } from "../utils/Format";
+import { Upload } from "../utils/Upload";
 
 export class Message extends Model{
 
@@ -19,7 +20,7 @@ export class Message extends Model{
     }
     set id(value){
 
-        return this._data.id=value;
+        return this._data.id = value;
 
     }
 
@@ -127,7 +128,7 @@ export class Message extends Model{
         return this._data.size;
 
     }
-    set size(set){
+    set size(value){
 
         return this._data.size=value;
 
@@ -170,7 +171,7 @@ export class Message extends Model{
 
     static getRef(chatId){
 
-        return Firebase.db().collection('chats').doc(chatId).collection('messages');
+        return Firebase.db().collection('/chats').doc(chatId).collection('messages');
 
     }
 
@@ -312,7 +313,7 @@ export class Message extends Model{
                                                         </svg>
                                                     </span>
                                                 </button>
-                                                <button class="_2pQE3 audio-pause">
+                                                <button class="_2pQE3 audio-pause" style="display:none">
                                                     <span data-icon="audio-pause">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="34" height="34">
                                                             <path fill="#263238" fill-opacity=".5" d="M9.2 25c0 .5.4 1 .9 1h3.6c.5 0 .9-.4.9-1V9c0-.5-.4-.9-.9-.9h-3.6c-.4-.1-.9.3-.9.9v16zm11-17c-.5 0-1 .4-1 .9V25c0 .5.4 1 1 1h3.6c.5 0 1-.4 1-1V9c0-.5-.4-.9-1-.9 0-.1-3.6-.1-3.6-.1z"></path>
@@ -430,7 +431,7 @@ export class Message extends Model{
                         }else {
 
                             btnPause.show();
-                            
+
                         }
 
                     }
@@ -527,14 +528,11 @@ export class Message extends Model{
                      `;
         }
 
-        
-
         let className = 'message-in'
         if(me){
 
             className = 'message-out'
             div.querySelector('.msg-time').parentElement.appendChild(this.getStatus());
-            this.getStatus();
 
         }
 
@@ -583,25 +581,7 @@ export class Message extends Model{
 
     static upload(file, from){
 
-        return new Promise((s,f)=>{
-            
-            let uploadTask = Firebase.hd().ref(from).child(Date.now()+'_'+file.name).put(file);
-
-            uploadTask.on('state_changed', e=>{
-
-                console.info('upload', e);
-
-            }, err=>{
-
-                f(err);
-
-            }, ()=>{
-
-                s(uploadTask.snapshot);
-
-            })
-
-        });
+        return Upload.send(file, from);
 
     }
 
