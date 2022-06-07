@@ -1,35 +1,34 @@
-export class CameraController{
-
-    constructor(videoEl){
-
+export class CameraController {
+    constructor(videoEl) {
         this._videoEl = videoEl;
+    
         navigator.mediaDevices.getUserMedia({
-            video:true
-        }).then(stream=>{
 
-            let mediaStream = new MediaStream(stream);
-            this._stream=stream;
-            this._videoEl.srcObject = mediaStream;
+            video: true
+
+        }).then(stream => {
+
+            this._mediaStream = new MediaStream(stream);
+            this._videoEl.srcObject = this._mediaStream;
             this._videoEl.play();
 
-        }).catch(err=>{
+        }).catch(err => {
 
-            console.error(err)
+            console.error(err);
 
-        })
+        });
     }
+    
+    stop() {
 
-    stopCamera(){
-
-        this._stream.getTracks().forEach(track=>{
+        this._mediaStream.getTracks().forEach(track => {
 
             track.stop();
 
-        })
-
+        });
     }
 
-    takePicture(mimeType='image/png'){
+    takePicture(mimeType = 'image/png') {
 
         let canvas = document.createElement('canvas');
 
@@ -38,9 +37,8 @@ export class CameraController{
 
         let context = canvas.getContext('2d');
         context.drawImage(this._videoEl, 0, 0, canvas.width, canvas.height);
-
+    
         return canvas.toDataURL(mimeType);
 
     }
-
 }

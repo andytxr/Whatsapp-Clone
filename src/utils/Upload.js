@@ -1,30 +1,26 @@
-import { Firebase } from "./Firebase.js";
+import { Firebase } from "./Firebase";
 
-export class Upload{
+export class Upload {
+    
+    static send(file, from) {
 
-    static send(file,from){
+        return new Promise((success, failure) => {
 
-        return new Promise((s,f)=>{
-            
-            let uploadTask = Firebase.hd().ref(from).child(Date.now()+'_'+file.name).put(file);
+            let uploadTask = Firebase.hd().ref(from).child(Date.now() + file.name).put(file);
+        
+            uploadTask.on('state_changed', e => {
 
-            uploadTask.on('state_changed', e=>{
+                console.info('upload: ', e)
 
-                console.info('upload', e);
+            }, err => {
 
-            }, err=>{
+                failure(err);
 
-                f(err);
+            }, () => {
 
-            }, ()=>{
+                success(uploadTask.snapshot);
 
-                s(uploadTask.snapshot);
-
-            })
-
-        });
-
+            });
+        })
     }
-
-
 }

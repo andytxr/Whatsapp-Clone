@@ -1,96 +1,85 @@
-import {CameraController} from './CameraController.js'
-import {DocumentPreviewController} from './DocumentPreviewController.js'
-import {ContactController} from './ContactController.js'
-import {MicrophoneController} from './MicrophoneController.js'
-import {Firebase} from './../utils/Firebase.js'
-import {Format} from './../utils/Format.js'
-import {Base64 } from '../utils/Base64.js'
-import {User} from './../models/User.js'
-import {Chat} from '../models/Chat.js'
-import {Message} from '../models/Message.js'
-import {Upload} from '../utils/Upload.js'
+import { Format } from './../utils/Format';
+import { CameraController } from './CameraController';
+import { MicrophoneController } from './MicrophoneController';
+import { DocumentPreviewController } from './DocumentPreviewController';
+import { Firebase } from '../utils/Firebase';
+import { Message } from '../model/Message';
+import { User } from '../model/User';
+import { Chat } from '../model/Chat';
+import { Base64 } from '../utils/Base64';
+import { ContactsController } from './ContactsController';
+import { Upload } from '../utils/Upload';
 
-export class WhatsAppController{
+export default class WhatsAppController {
 
-    constructor(){
+    constructor() {
+        this._firebase = new Firebase();
+        this.initAuth();
 
-       this._active = true;
-       this._firebase = new Firebase();
-       
-       this.initAuth();  
-       this.elementsPrototype();
-       this.loadElements();
-       this.initEvents();
-       this.checkNotifications();
+        this.elementsPrototype();
+        this.loadElements();
+        this.initEvents();
 
     }
 
-     //Inicializando Funcionalidades
+    initAuth() {
 
-     initAuth(){
-
-        this._firebase.initAuth().then(response=>{
-
+        this._firebase.initAuth().then(response => {
             this._user = new User(response.user.email);
 
-            this._user.on('datachange', data=>{
+            this._user.on('datachange', data => {
+                document.querySelector('title').innerHTML = data.name + ' - Whatsapp Clone';
 
-                    document.querySelector('title').innerHTML = data.name + ' - Whatsapp Clone'
+                this.el.inputNamePanelEditProfile.innerHTML = data.name;
 
-                    this.el.inputNamePanelEditProfile.innerHTML = data.name;
-                    if(data.photo){
-                        
-                        let photo = this.el.imgPanelEditProfile;
-                        photo.src = data.photo;
-                        photo.show();
-                        this.el.imgDefaultPanelEditProfile.hide();
+                if(data.photo) {
+                    let photo = this.el.imgPanelEditProfile;
+                    photo.src = data.photo;
+                    photo.show();
 
-                        let photob = this.el.myPhoto.querySelector('img');
-                        photob.src = data.photo;
-                        photob.show();               
+                    this.el.imgDefaultPanelEditProfile.hide();
 
-                    }
+                    let headerPhoto = this.el.myPhoto.querySelector('img');
+                    headerPhoto.src = data.photo;
+                    headerPhoto.show();
+                }
 
                 this.initContacts();
-
             });
 
             this._user.name = response.user.displayName;
             this._user.email = response.user.email;
-            this._user.photo = response.user.photoURL;
+            this._user.photo = response.user.photoURL
 
-            this._user.saveUser().then(()=>{
+            this._user.save().then(() => {
 
                 this.el.appContent.css({
+
                     display: 'flex'
                 });
 
             });
+            
+        }).catch(err => {
 
-        }).catch(err=>{
-
-            console.error(err);
+            console.log(err);
 
         });
-
     }
 
-    initContacts(){
-
-        this._user.on('contactschanged', docs =>{
-
-            this.el.contactsMessagesList.innerHTML = ``;
-
-            docs.forEach(doc =>{
-
+    initContacts() {
+        this._user.on('contactschange', docs => {
+            this.el.contactsMessagesList.innerHTML = '';
+            docs.forEach(doc => {
                 let contact = doc.data();
-
                 let div = document.createElement('div');
-                div.className = 'contact-item'
+        
+                div.className = 'contact-item';
+        
                 div.innerHTML = `
-                        <div class="dIyEr">
-                            <div class="_1WliW" style="height: 49px; width: 49px;">
-                                <img src="#" class="Qgzj8 gqwaM photo" style="display:none;">
+                    <div class="dIyEr">
+                        <div class="_1WliW" style="height: 49px; width: 49px;">
+                            <img src="#" class="Qgzj8 gqwaM photo" style="display:none;">
                             <div class="_3ZW2E">
                                 <span data-icon="default-user" class="">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" width="212" height="212">
@@ -102,20 +91,19 @@ export class WhatsAppController{
                                 </span>
                             </div>
                         </div>
-                        </div>
-                        <div class="_3j7s9">
+                    </div>
+                    <div class="_3j7s9">
                         <div class="_2FBdJ">
                             <div class="_25Ooe">
                                 <span dir="auto" title="${contact.name}" class="_1wjpf">${contact.name}</span>
                             </div>
                             <div class="_3Bxar">
-                                <span class="_3T2VG">${Format.timeStampToTime(contact.lastMessageTime)}</span>
+                                <span class="_3T2VG">${contact.lastMessageTime}</span>
                             </div>
                         </div>
                         <div class="_1AwDx">
                             <div class="_itDl">
                                 <span title="digitando…" class="vdXUe _1wjpf typing" style="display:none">digitando…</span>
-
                                 <span class="_2_LEW last-message">
                                     <div class="_1VfKB">
                                         <span data-icon="status-dblcheck" class="">
@@ -130,346 +118,246 @@ export class WhatsAppController{
                                             <div class="_15G96">
                                                 <span class="OUeyt messages-count-new" style="display:none;">1</span>
                                             </div>
+                                        </span>
                                     </div>
-                                    </span>
+                                </span>
                             </div>
                         </div>
                     </div>
-                    `;
-                
-                if(contact.photo){
+                `;
+
+                if(contact.photo) {
 
                     let img = div.querySelector('.photo');
-                    img.src=contact.photo;
+                    img.src = contact.photo;
                     img.show();
 
                 }
 
-                div.on('click', e=>{
-
-                    console.log("chatId", contact.chatId);
-                    console.log("data", this._data);
+                div.on('click', e => {
                     this.setActiveChat(contact);
 
                 });
-                
+
                 this.el.contactsMessagesList.appendChild(div);
-            
             });
 
         });
 
-        this._user.getContact();
+        this._user.getContacts();
 
     }
 
-    initEvents(){
+    initEvents() {
 
-        //Eventos da tela inicial
+        this.el.inputSearchContacts.on('keyup focus keydown', e => {
 
-        window.addEventListener('focus', e=>{
-
-            this._active = true;
-
-        });
-
-        window.addEventListener('blur', e=>{
-
-            this._active = false;
-
-        });
-
-        //Eventos do perfil
-
-        this.el.myPhoto.on('click', e=>{
-
-            this.closeLeftPanels();
-
-            this.el.panelEditProfile.show();
-
-            setTimeout(()=>{
-
-                this.el.panelEditProfile.addClass('open');
-
-            },300)
-
-            
-        });  
-
-        this.el.btnClosePanelEditProfile.on('click', e=>{
-
-            this.el.panelEditProfile.removeClass('open');
-
-        });
-
-        this.el.photoContainerEditProfile.on('click', e=>{
-
-            this.el.inputProfilePhoto.click();
-
-        });
-
-        this.el.inputProfilePhoto.on('change', e=>{
-
-            if(this.el.inputProfilePhoto.files.length>0){
-
-                let file = this.el.inputProfilePhoto.files[0];
-
-                Upload.send(file, this._user.email).then(snapshot=>{
-
-                    this._user.photo = snapshot.downloadURL;
-                    this._user.saveUser().then(()=>{
-
-                        this.el.btnClosePanelEditProfile.click();
-
-                    });
-
-                })
-
-            }
-            
-        })
-
-        this.el.inputNamePanelEditProfile.on('keypress', e=>{
-
-            if(e.key==='Enter'){
-
-                e.preventDefault();
-                this.el.btnSavePanelEditProfile.click();
-
-            };
-
-        });
-
-        this.el.btnSavePanelEditProfile.on('click', e=>{
-
-            this.el.btnSavePanelEditProfile.disabled=true;
-
-            this._user.name=this.el.inputNamePanelEditProfile.innerHTML;
-            this._user.saveUser().then(()=>{
-
-                this.el.btnSavePanelEditProfile.disabled=false;
-            
-            });
-
-        });
-
-        this.el.formPanelAddContact.on('submit', e=>{
-
-            e.preventDefault();
-
-            let formData = new FormData(this.el.formPanelAddContact);
-
-            let contact = new User(formData.get('email'))
-            console.log('contato', contact);
-            contact.on('datachange', data =>{
-
-                if(data.name){
-
-                    Chat.createChat(this._user.email, contact.email).then(chat =>{
-
-                        contact.chatId = chat.id;
-                        this._user.chatId = chat.id;
-                        contact.addContact(this._user);
-
-                        this._user.addContact(contact).then(()=>{
-
-                            this.el.btnClosePanelAddContact.click();
-                            console.info('The contact has been added with success');
-    
-                        });
-
-                    });
-                    
-                }else{
-
-                    console.error('User not found')
-
-                }
-
-            });
-
-        });
-
-        this.el.inputSearchContacts.on('keyup', e=>{
-
-            if(this.el.inputSearchContacts.value.length > 0){
+            if (this.el.inputSearchContacts.value.length > 0) {
 
                 this.el.inputSearchContactsPlaceholder.hide();
 
-            }else{
+            } else {
 
                 this.el.inputSearchContactsPlaceholder.show();
 
             }
 
-            this._user.getContact(this.el.inputSearchContacts.value);
+            this._user.getContacts(this.el.inputSearchContacts.value);
 
         });
 
-        //Eventos de contato
+        this.el.myPhoto.on('click', e => {
 
-        this.el.btnNewContact.on('click', e=>{
+            this.closeAllLeftPanel();
+            this.el.panelEditProfile.show();
 
-            this.closeLeftPanels();
+            setTimeout(() => {
 
+                this.el.panelEditProfile.addClass('open');
+
+            }, 300);
+
+        });
+
+        this.el.btnNewContact.on('click', e => {
+
+            this.closeAllLeftPanel();
             this.el.panelAddContact.show();
-            setTimeout(()=>{
+            setTimeout(() => {
 
                 this.el.panelAddContact.addClass('open');
 
-            },300)
-            
+            }, 300);
+
         });
 
-        this.el.btnClosePanelAddContact.on('click', e=>{
+        this.el.btnClosePanelEditProfile.on('click', e => {
+
+            this.el.panelEditProfile.removeClass('open');
+
+        });
+
+        this.el.btnClosePanelAddContact.on('click', e => {
 
             this.el.panelAddContact.removeClass('open');
 
         });
 
-        this.el.contactsMessagesList.querySelectorAll('.contact-item').forEach(item=>{
+        this.el.photoContainerEditProfile.on('click', e => {
 
-            item.on('click', e=>{
+            this.el.inputProfilePhoto.click();
 
-                this.el.home.hide();
-                this.el.main.css({
-                    display:'flex'
+        });
+
+        this.el.inputProfilePhoto.on('change', e => {
+
+            if(this.el.inputProfilePhoto.files.length > 0) {
+
+                let file = this.el.inputProfilePhoto.files[0];
+
+                Upload.send(file, this._user.email).then(snapshot => {
+
+                    this._user.photo = snapshot.downloadURL;
+                    this._user.save().then(() => {
+
+                        this.el.btnClosePanelEditProfile.click();
+
+                    });
+
                 });
 
-            });
-
-        });
-
-        //Eventos da tela de conversação
-
-        //Entrada de Texto
-
-        this.el.inputText.on('keyup', e=>{
-
-            if(this.el.inputText.innerHTML.length){
-
-                this.el.inputPlaceholder.hide();
-                this.el.btnSendMicrophone.hide();
-                this.el.btnSend.show();
-
-            }else{
-
-                this.el.inputPlaceholder.show();
-                this.el.btnSendMicrophone.show();
-                this.el.btnSend.hide();
             }
 
-        });
+        })
 
-        this.el.inputText.on('keypress', e=>{
+        this.el.inputNamePanelEditProfile.on('keypress', e => {
 
-            if(e.key==='Enter' && !e.ctrlKey && !e.shiftKey){
+            if (e.key === 'Enter') {
 
                 e.preventDefault();
 
-                this.el.btnSend.click();
+                this.el.btnSavePanelEditProfile.click();
 
             }
 
         });
 
-        this.el.btnSend.on('click', e=>{
+        this.el.btnSavePanelEditProfile.on('click', e => {
 
-            Message.send(this._contactActive.chatId, this._user.email, 'text', this.el.inputText.innerHTML);
-            this.el.inputText.innerHTML='';
-            this.el.panelEmojis.removeClass('open');
+            this.el.btnSavePanelEditProfile.disabled = true;
+            this._user.name = this.el.inputNamePanelEditProfile.innerHTML;
+            
+            this._user.save().then(() => {
 
-        });
+                this.el.btnSavePanelEditProfile.disabled = false;
 
-        //Emoji
-
-        this.el.btnEmojis.on('click', e=>{
-
-            this.el.panelEmojis.toggleClass('open');
+            })
 
         });
-        
-        this.el.panelEmojis.querySelectorAll('.emojik').forEach(emoji=>{
 
-            emoji.on('click', e=>{
+        this.el.formPanelAddContact.on('submit', e => {
 
-                console.log(emoji.dataset.unicode);
+            e.preventDefault();
 
-                let img = this.el.imgEmojiDefault.cloneNode();
+            let formData = new FormData(this.el.formPanelAddContact);
+            let contact = new User(formData.get('email'));
 
-                img.style.cssText = emoji.style.cssText;
-                img.dataset.unicode = emoji.dataset.unicode;
-                img.alt = emoji.dataset.unicode;
+            contact.on('datachange', data => {
 
-                emoji.classList.forEach(name=>{
+                if(data.name) {
 
-                    img.classList.add(name);
+                    Chat.createIfNotExists(this._user.email, contact.email).then(chat => {
 
-                });
+                        contact.chatId = chat.id;
+                        this._user.chatId = chat.id;
 
-                let cursor = window.getSelection();
-                if(!cursor.focusNode || !cursor.focusNode.id == 'input-text'){
+                        contact.addContact(this._user);
 
-                    this.el.inputText.focus();
+                        this._user.addContact(contact).then(() => {
 
-                    cursor = window.getSelection();
+                            this.el.btnClosePanelAddContact.click();
+                            console.info('Contact added successfully');
+
+                        });
+
+                    });
+
+                } else {
+
+                    console.error('User not found');
 
                 }
 
-                let range = document.createRange();
-                range = cursor.getRangeAt(0);
-                range.deleteContents();
+            });
 
-                let frag = document.createDocumentFragment();
-                frag.appendChild(img);
-                range.insertNode(frag);
-                range.setStartAfter(img);
+        })
 
-                this.el.inputText.dispatchEvent(new Event('keyup'));
+        this.el.contactsMessagesList.querySelectorAll('.contact-item').forEach((item) => {
+
+            item.on('click', e => {
+
+                this.el.home.hide();
+                this.el.main.css({
+
+                    display: 'flex'
+
+                });
 
             });
 
         });
 
-        //Anexo
-
-        this.el.btnAttach.on('click', e=>{
+        this.el.btnAttach.on('click', e => {
 
             e.stopPropagation();
             this.el.menuAttach.addClass('open');
             document.addEventListener('click', this.closeMenuAttach.bind(this))
-            
+
+        })
+
+        this.el.btnAttachPhoto.on('click', e => {
+
+            this.el.inputPhoto.click();
+
         });
 
-        //Camera
+        this.el.inputPhoto.on('change', e => {
 
-        this.el.btnAttachCamera.on('click', e=>{
+            [...this.el.inputPhoto.files].forEach(file => {
 
-            this.closeMainPanel();
+                Message.sendImage(this._contactActive.chatId, this._user.email, file);
+
+            })
+
+        });
+
+        this.el.btnAttachCamera.on('click', e => {
+
+            this.closeAllMainPanel();
             this.el.panelCamera.addClass('open');
             this.el.panelCamera.css({
 
-                height:'500px'
+                height: '100%'
 
-            });
+            })
 
             this._camera = new CameraController(this.el.videoCamera);
-            
+
         });
 
-        this.el.btnClosePanelCamera.on('click', e=>{
+        this.el.btnClosePanelCamera.on('click', e => {
 
-            this.closeMainPanel();
+            this.closeAllMainPanel();
             this.el.panelMessagesContainer.show();
-            this._camera.stopCamera();
+            this._camera.stop();
 
         });
 
-        this.el.btnTakePicture.on('click', e=>{
+        this.el.btnTakePicture.on('click', e => {
 
-            let dataURL = this._camera.takePicture()
+            let dataUrl = this._camera.takePicture();
 
-            this.el.pictureCamera.src=dataURL;
+            this.el.pictureCamera.src = dataUrl;
             this.el.pictureCamera.show();
             this.el.videoCamera.hide();
             this.el.btnReshootPanelCamera.show();
@@ -478,98 +366,81 @@ export class WhatsAppController{
 
         });
 
-        this.el.btnReshootPanelCamera.on('click', e=>{
+        this.el.btnReshootPanelCamera.on('click', e => {
 
             this.el.pictureCamera.hide();
             this.el.videoCamera.show();
             this.el.btnReshootPanelCamera.hide();
             this.el.containerTakePicture.show();
-            this.el.containerSendPicture.hide();
+            this.el.containerSendPicture.hide()
 
         });
 
-        this.el.btnSendPicture.on('click', e=>{
+        this.el.btnSendPicture.on('click', e => {
 
-            this.el.btnSendPicture.disabled=true;
+            this.el.btnSendPicture.disabled = true;
 
             let regex = /^data:(.+);base64,(.*)$/;
-            let res = this.el.pictureCamera.src.match(regex);
-            let mimeType = res[1];
-            let ext = mimeType.split("/")[1];
-            let filename = `camera${Date.now()}.${ext}`
+            let result = this.el.pictureCamera.src.match(regex);
+
+            let mimeType = result[1];
+            let ext = mimeType.split('/')[1];
+            let filename = `camera_${Date.now()}.${ext}`;
 
             let picture = new Image();
-            picture.src=this.el.pictureCamera.src;
-            picture.onload=e=>{
+            picture.src = this.el.pictureCamera.src;
+
+            picture.onload = e => {
 
                 let canvas = document.createElement('canvas');
                 let context = canvas.getContext('2d');
-
-                canvas.height=picture.height;
-                canvas.width=picture.width;
+            
+                canvas.width = picture.width;
+                canvas.height = picture.height;
 
                 context.translate(picture.width, 0);
-                context.scale(-1,1);
-                context.drawImage(picture, 0,0, canvas.width, canvas.height);
-
-                fetch(canvas.toDataURL(mimeType)).then(res=>{
-
-                    return res.arrayBuffer();
+                context.scale(-1, 1);
                 
-                }).then(buffer=>{
-    
-                    return new File([buffer], filename, {type: mimeType})
+                context.drawImage(picture, 0, 0, canvas.width, canvas.height);
+            
+                fetch(canvas.toDataURL(mimeType)).then(res => { 
                     
-                }).then(file=>{
+                    return res.arrayBuffer(); 
                 
-                    Message.sendImage(this._contactActive.chatId, this._user.email, file)
-                    this.el.btnSendPicture.disabled=false;
+                }).then(buffer => { 
+                    
+                    return new File([buffer], filename, { mime: mimeType }); 
+                
+                }).then(file => {
 
-                    this.closeMainPanel();
-                    this._camera.stopCamera();
+                    Message.sendImage(this._contactActive.chatId, this._user.email, file);
+
+                    this.closeAllMainPanel();
+                    this._camera.stop(); // pára de gravar
+                    
                     this.el.btnReshootPanelCamera.hide();
                     this.el.pictureCamera.hide();
                     this.el.videoCamera.show();
                     this.el.containerSendPicture.hide();
                     this.el.containerTakePicture.show();
                     this.el.panelMessagesContainer.show();
-    
+                    
+                    this.el.btnSendPicture.disabled = true;
+
                 });
 
             }
 
         });
 
-        //Contatos
+        this.el.btnAttachDocument.on('click', e => {
 
-        this.el.btnAttachContact.on('click', e=>{
-
-            this._contact = new ContactController(this.el.modalContacts, this._user);
-            this._contact.on('select', extract =>{
-
-                Message.sendContact(this._contactActive.chatId, this._user.uid, contact);
-
-            });
-            
-            this._contact.openModal();
-            
-        });
-
-        this.el.btnCloseModalContacts.on('click', e=>{
-
-            this._contact.closeModal()
-
-        });
-
-        //Documentos
-
-        this.el.btnAttachDocument.on('click', e=>{
-
-            this.closeMainPanel();
+            this.closeAllMainPanel();
+            this.el.panelDocumentPreview.addClass('open');
             this.el.panelDocumentPreview.addClass('open');
             this.el.panelDocumentPreview.css({
 
-                height:'500px'
+                height: '100%'
 
             });
 
@@ -577,144 +448,153 @@ export class WhatsAppController{
 
         });
 
-        this.el.inputDocument.on('change', e=>{
+        this.el.inputDocument.on('change', e => {
 
-            if(this.el.inputDocument.files.length){
+            if (this.el.inputDocument.files.length) {
 
                 this.el.panelDocumentPreview.css({
-                    
-                    height:'1%'
-                
+
+                    height: '1%'
+
                 });
 
-                let file=this.el.inputDocument.files[0];
+                let file = this.el.inputDocument.files[0];
+
                 this._documentPreviewController = new DocumentPreviewController(file);
 
-                this._documentPreviewController.getPreviewData().then(result=>{
+                this._documentPreviewController.getPreviewData().then(result => {
 
-                    this.el.imgPanelDocumentPreview.src=result.src;
-                    this.el.infoPanelDocumentPreview.innerHTML=result.info;
+                    this.el.imgPanelDocumentPreview.src = result.src;
+                    this.el.infoPanelDocumentPreview.innerHTML = result.info;
                     this.el.imagePanelDocumentPreview.show();
                     this.el.filePanelDocumentPreview.hide();
 
                     this.el.panelDocumentPreview.css({
-                        height:'500px'
-                    })
 
-                }).catch(err=>{
+                        height: '100%'
 
-                    console.log(file.type);
+                    });
+
+                }).catch(err => {
+
                     this.el.panelDocumentPreview.css({
-                        height:'500px'
-                    })
 
-                    switch(file.type){
+                        height: '100%'
+
+                    });
+
+                    switch (file.type) {
 
                         case 'application/vnd.ms-excel':
-                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':    
+                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 
-                            this.el.iconPanelDocumentPreview.className="jcxhw icon-doc-xls";
-
-                        break;
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-xls';
+                            break;
 
                         case 'application/vnd.ms-powerpoint':
                         case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
 
-                            this.el.iconPanelDocumentPreview.className="jcxhw icon-doc-ppt";
-
-                        break;
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-ppt';
+                            break;
 
                         case 'application/msword':
                         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                        
-                            this.el.iconPanelDocumentPreview.className="jcxhw icon-doc-doc";
 
-                        break;
-
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-doc';
+                            break;
 
                         default:
 
-                            this.el.iconPanelDocumentPreview.className="jcxhw icon-doc-generic";
-                        
-                        break;
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-generic';
+                            break;
 
                     }
 
                     this.el.filenamePanelDocumentPreview.innerHTML = file.name;
                     this.el.imagePanelDocumentPreview.hide();
                     this.el.filePanelDocumentPreview.show();
-
-                });
-
+                })
             }
-
         });
 
-        this.el.btnClosePanelDocumentPreview.on('click', e=>{
+        this.el.btnClosePanelDocumentPreview.on('click', e => {
 
-            this.closeMainPanel();
+            this.closeAllMainPanel();
             this.el.panelMessagesContainer.show();
 
         });
 
-        this.el.btnSendDocument.on('click', e=>{
+        this.el.btnSendDocument.on('click', e => {
 
             let file = this.el.inputDocument.files[0];
-            let base64 = this.el.imgPanelDocumentPreview
+            let base64 = this.el.imgPanelDocumentPreview.src;
 
-            if(file.type === 'application/pdf'){
+            if(file.type === 'application/pdf') {
+                Base64.toFile(base64).then(filePreview => {
 
-                Base64.toFile(base64).then(filePreview =>{
+                    Message.sendDocument(
+                        this._contactActive.chatId,
+                        this._user.email,
+                        file,
+                        filePreview,
+                        this.el.infoPanelDocumentPreview.innerHTML
 
-                    Message.sendDocument(this._contactActive.id, this._user.uid, file, filePreview, this.el.infoPanelDocumentPreview.innerHTML);
+                    );
+                });
 
-                })
+            } else {
 
-            }else{
+                Message.sendDocument(
+                    this._contactActive.chatId,
+                    this._user.email,
+                    file,
 
-                Message.sendDocument(this._contactActive.id, this._user.uld, file);
+                );
 
             }
 
             this.el.btnClosePanelDocumentPreview.click();
+        })
 
-        });
+        this.el.btnAttachContact.on('click', e => {
 
-        //Fotos
+            this._contactsController = new ContactsController(this.el.modalContacts, this._user);
 
-        this.el.btnAttachPhoto.on('click', e=>{
+            this._contactsController.on('select', contact => {
 
-            this.el.inputPhoto.click()
+                Message.sendContact(
+                    this._contactActive.chatId,
+                    this._user.email,
+                    contact
 
-        });
-
-        this.el.inputPhoto.on('change', e=>{
-
-            [...this.el.inputPhoto.files].forEach(file=>{
-
-                Message.sendImage(this._contactActive.chatId, this._user.uid, file)
+                );
 
             });
 
+            this._contactsController.open();
+
         });
 
-        //Áudio
+        this.el.btnCloseModalContacts.on('click', e => {
 
-        this.el.btnSendMicrophone.on('click', e=>{
+            this._contactsController.close();
+
+        });
+
+        this.el.btnSendMicrophone.on('click', e => {
 
             this.el.recordMicrophone.show();
             this.el.btnSendMicrophone.hide();
 
-            this._microphone=new MicrophoneController();
-            
-            this._microphone.on('ready', audio=>{
+            this._microphoneController = new MicrophoneController();
 
-                console.log('foi.');
-                this._microphone.startRecorder();
+            this._microphoneController.on('ready', audio => {
+
+                this._microphoneController.startRecorder();
 
             });
 
-            this._microphone.on('rectimer', timer=>{
+            this._microphoneController.on('recordtimer', timer => {
 
                 this.el.recordMicrophoneTimer.innerHTML = Format.toTime(timer);
 
@@ -722,143 +602,208 @@ export class WhatsAppController{
 
         });
 
-        this.el.btnCancelMicrophone.on('click', e=>{
+        this.el.btnCancelMicrophone.on('click', e => {
 
-            this._microphone.stopRecorder();
+            this._microphoneController.stopRecorder();
             this.closeRecordMicrophone();
 
         });
 
-        this.el.btnFinishMicrophone.on('click', e=>{
+        this.el.btnFinishMicrophone.on('click', e => {
 
-            this._microphone.on('recorded', e=>{
+            this._microphoneController.on('recorded', (file, metadata) => {
 
-                this._microphone.on('recorded', (file, metadata)=>{
+                Message.sendAudio(
 
-                    Message.sendAudio(this._contactActive.chatId, this._user.uid, file, metadata, this._user.photo);
+                    this._contactActive.chatId,
+                    this._user.email,
+                    file,
+                    metadata,
+                    this._user.photo,
+
+                );
+
+            });
+
+            this._microphoneController.stopRecorder();
+            this.closeRecordMicrophone();
+
+        });
+
+        this.el.inputText.on('keypress', e => {
+
+            if (e.key === 'Enter' && !e.ctrlKey) {
+
+                e.preventDefault();
+                this.el.btnSend.click();
+
+            }
+
+        });
+
+        this.el.inputText.on('keyup focus keydown', e => {
+
+            if (this.el.inputText.innerHTML.length) {
+
+                this.el.inputPlaceholder.hide();
+                this.el.btnSendMicrophone.hide();
+                this.el.btnSend.show();
+
+            } else {
+
+                this.el.inputPlaceholder.show();
+                this.el.btnSendMicrophone.show();
+                this.el.btnSend.hide();
+
+            }
+
+        });
+
+        this.el.btnSend.on('click', e => {
+
+            Message.send(this._contactActive.chatId, this._user.email, 'text', this.el.inputText.innerHTML);
+
+            this.el.inputText.innerHTML = '';
+            this.el.panelEmojis.removeClass('open');
+
+        });
+
+        this.el.btnEmojis.on('click', e => {
+
+            this.el.panelEmojis.toggleClass('open');
+
+        });
+
+        this.el.panelEmojis.querySelectorAll('.emojik').forEach(emoji => {
+
+            emoji.on('click', e => {
+
+                console.log(emoji.dataset.unicode);
+                let img = this.el.imgEmojiDefault.cloneNode();
+
+                img.style.cssText = emoji.style.cssText;
+                img.dataset.unicode = emoji.dataset.unicode;
+                img.alt = emoji.dataset.unicode;
+
+                emoji.classList.forEach(name => {
+
+                    img.classList.add(name);
 
                 });
 
+                this.el.inputText.appendChild(img);
+
+                let cursor = window.getSelection();
+
+                if (!cursor.focusNode.id || cursor.focusNode.id == 'input-text') {
+
+                    this.el.inputText.focus();
+                    cursor = window.getSelection();
+
+                }
+
+                let range = document.createRange();
+
+                range = cursor.getRangeAt(0);
+                range.deleteContents();
+
+                let frag = document.createDocumentFragment();
+
+                frag.appendChild(img);
+                range.insertNode(frag);
+                range.setStartAfter(img)
+
+                this.el.inputText.dispatchEvent(new Event('keyup'));
+
             });
 
-            this._microphone.stopRecorder();
-            this.closeRecordMicrophone();
+        });
+
+    }
+
+    loadElements() {
+        this.el = {};
+
+        document.querySelectorAll('[id]').forEach(element => {
+            
+            this.el[Format.getCamelCase(element.id)] = element;
 
         });
 
     }
 
-    //Iniciando elementos 
-
-    loadElements(){
-
-        this.el={};
-
-        document.querySelectorAll('[id]').forEach(element=>{
-
-            this.el[Format.getCamelCase(element.id)]=element;
-
-        });
-
-    }
-
-    elementsPrototype(){
-
-        Element.prototype.hide=function(){
-
-            this.style.display="none";
+    elementsPrototype() {
+        Element.prototype.hide = function () {
+            this.style.display = 'none';
             return this;
+        };
 
+        Element.prototype.show = function () {
+            this.style.display = 'block';
+            return this;
         }
 
-        Element.prototype.show=function(){
-
-            this.style.display="block";
+        Element.prototype.toggle = function () {
+            this.style.display = (this.style.display === 'none') ? 'block' : 'none';
             return this;
-
         }
 
-        Element.prototype.toggle=function(){
-
-            this.style.display=(this.style.display === 'none') ? 'block' : 'none';
-            return this;
-
-        }
-
-        Element.prototype.on=function(events, fn){
-
-            events.split(' ').forEach(event =>{
-
+        Element.prototype.on = function (events, fn) {
+            events.split(' ').forEach(event => {
                 this.addEventListener(event, fn);
-
             });
             return this;
-
         }
 
-        Element.prototype.css=function(styles){
-
-            for(let name in styles){
-
-                this.style[name]=styles[name];
-
+        Element.prototype.css = function (styles) {
+            for (let name in styles) {
+                this.style[name] = styles[name];
             }
             return this;
-
         }
 
-        Element.prototype.addClass=function(className){
-
-            this.classList.add(className);
+        Element.prototype.addClass = function (name) {
+            this.classList.add(name);
             return this;
-
         }
 
-        Element.prototype.removeClass=function(className){
-
-            this.classList.remove(className);
+        Element.prototype.removeClass = function (name) {
+            this.classList.remove(name);
             return this;
-
         }
 
-        Element.prototype.toggleClass=function(className){
-
-            this.classList.toggle(className);
+        Element.prototype.toggleClass = function (name) {
+            this.classList.toggle(name);
             return this;
-
         }
 
-        Element.prototype.hasClass=function(className){
-
-            return this.classList.contains(className);
-
+        Element.prototype.hasClass = function (name) {
+            return this.classList.includes(name);
         }
 
-        HTMLFormElement.prototype.getForm=function(){
-
+        HTMLFormElement.prototype.getForm = function () {
             return new FormData(this);
-
         }
 
-        HTMLFormElement.prototype.toJSON=function(){
-
+        HTMLFormElement.prototype.toJSON = function () {
             let json = {};
 
-            this.getForm().forEach((value, key)=>{
-
+            this.getForm().forEach((value, key) => {
                 json[key] = value;
-
-            });
+            })
 
             return json;
-
         }
+    }
+
+    closeRecordMicrophone() {
+
+        this.el.recordMicrophone.hide();
+        this.el.btnSendMicrophone.show();
 
     }
 
-    //Funcionalidades do Display
-
-    closeMainPanel(){
+    closeAllMainPanel() {
 
         this.el.panelMessagesContainer.hide();
         this.el.panelDocumentPreview.removeClass('open');
@@ -866,28 +811,20 @@ export class WhatsAppController{
 
     }
 
-    closeLeftPanels(){
+    closeMenuAttach(e) {
+
+        document.removeEventListener('click', this.closeMenuAttach);
+        this.el.menuAttach.removeClass('open');
+
+    }
+
+    closeAllLeftPanel() {
 
         this.el.panelAddContact.hide();
         this.el.panelEditProfile.hide();
 
     }
 
-    closeMenuAttach(e){
-
-        document.removeEventListener('click', this.closeMenuAttach)
-        this.el.menuAttach.removeClass('open');
-
-    }
-
-    closeRecordMicrophone(){
-
-        this.el.recordMicrophone.hide();
-        this.el.btnSendMicrophone.show();
-
-    }
-
-    
     setActiveChat(contact) {
 
         if(this._contactActive) {
@@ -895,6 +832,7 @@ export class WhatsAppController{
             Message.getRef(this._contactActive.chatId).orderBy('timeStamp').onSnapshot(() => {});
 
         }
+
         this._contactActive = contact;
 
         this.el.activeName.innerHTML = contact.name;
@@ -909,6 +847,7 @@ export class WhatsAppController{
         }
 
         this.el.home.hide();
+
         this.el.main.css({
 
             display: 'flex'
@@ -919,148 +858,89 @@ export class WhatsAppController{
 
         Message.getRef(this._contactActive.chatId).orderBy('timeStamp').onSnapshot(docs => {
                 
-            let scrollTop = this.el.panelMessagesContainer.scrollTop;
-            let scrollTopMax = (this.el.panelMessagesContainer.scrollHeight - this.el.panelMessagesContainer.offsetHeight);
-            let autoScroll = (scrollTop >= scrollTopMax);
+                let scrollTop = this.el.panelMessagesContainer.scrollTop;
+                let scrollTopMax = (this.el.panelMessagesContainer.scrollHeight - this.el.panelMessagesContainer.offsetHeight);
+                let autoScroll = (scrollTop >= scrollTopMax);
 
-            docs.forEach(doc => {
+                docs.forEach(doc => {
+                    let data = doc.data();
+                    data.id = doc.id;
 
-                let data = doc.data();
-                data.id = doc.id;
-
-                let message = new Message();
-                message.fromJSON(data);
-                
-                let me = (data.from === this._user.uid);
-                let view = message.getViewElement(me);
-
-                if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)) {      
-
-                    if(!me) {
-
-                        doc.ref.set({
-
-                            status: 'read'
-
-                        }, {
-
-                            merge: true
-
-                        });
-
-                    }
+                    let message = new Message();
+                    message.fromJSON(data);
                     
-                    this.el.panelMessagesContainer.appendChild(view);
+                    let me = (data.from === this._user.email);
+                    let view = message.getViewElement(me);
 
-                } else {
+                    if(!this.el.panelMessagesContainer.querySelector('#_' + data.id)) {      
 
-                    let parent = this.el.panelMessagesContainer.querySelector('#_' + data.id).parentNode;
-                    parent.replaceChild(view, this.el.panelMessagesContainer.querySelector('#_' + data.id)); 
+                        if(!me) {
 
-                }
-        
-                if(this.el.panelMessagesContainer.querySelector('#_' + data.id) && me) {
+                            doc.ref.set({
 
-                    let msgEl = this.el.panelMessagesContainer.querySelector('#_' + data.id);
-                    msgEl.querySelector('.message-status').innerHTML = message.getStatusViewElement().outerHTML;
+                                status: 'read'
 
-                }
-
-                if(message.type === 'contact') {
-
-                    view.querySelector('.btn-message-send').on('click', e => {
-                        Chat.createIfNotExists(this._user.uid, message.content.email).then(chat => {
-                            let contact = new User(message.content.email);
-                            
-                            contact.on('datachange', data => {
-                                contact.chatId = chat.id;
-
-                                this._user.addContact(contact);
-                                this._user.chatId = chat.id;
-        
-                                contact.addContact(this._user);
-
-                                this.setActiveChat(contact);
+                            }, {
+                                merge: true
 
                             });
-                        });
-                    })
-                }
 
-            });
+                        }
+                        
+                        this.el.panelMessagesContainer.appendChild(view);
 
-            if(autoScroll) {
+                    } else {
 
-                this.el.panelMessagesContainer.scrollTop = (this.el.panelMessagesContainer.scrollHeight - this.el.panelMessagesContainer.offsetHeight);
-            } else {
+                        let parent = this.el.panelMessagesContainer.querySelector('#_' + data.id).parentNode;
+                        parent.replaceChild(view, this.el.panelMessagesContainer.querySelector('#_' + data.id));  
 
-                this.el.panelMessagesContainer.scrollTop = scrollTop; 
-            }
+                    }
+            
+                    if(this.el.panelMessagesContainer.querySelector('#_' + data.id) && me) {
 
-        });
-        
-    }
-    
-    checkNotifications(){
+                        let msgEl = this.el.panelMessagesContainer.querySelector('#_' + data.id);
+                        msgEl.querySelector('.message-status').innerHTML = message.getStatusViewElement().outerHTML;
 
-        if(typeof Notification === 'function'){
+                    }
 
-            if(Notification.permission !== 'granted'){
+                    if(message.type === 'contact') {
 
-                this.el.alertNotificationPermission.show();
+                        view.querySelector('.btn-message-send').on('click', e => {
 
-            }else{
+                            Chat.createIfNotExists(this._user.email, message.content.email).then(chat => {
 
-                this.el.alertNotificationPermission.hide();
+                                let contact = new User(message.content.email);
+                                
+                                contact.on('datachange', data => {
+                                    contact.chatId = chat.id;
 
-            }
+                                    this._user.addContact(contact);
+                                    this._user.chatId = chat.id;
+            
+                                    contact.addContact(this._user);
 
-            this.el.alertNotificationPermission.on('click', e=>{
+                                    this.setActiveChat(contact);
 
-                Notification.requestPermission(permission=>{
+                                });
 
-                    if(permission==='granted'){
+                            });
 
-                        this.el.alertNotificationPermission.hide();
-                        console.info('Permissão para notificar aceita');
+                        })
 
                     }
 
                 });
 
-            });
- 
-        }
+                if(autoScroll) {
 
-    }
+                    this.el.panelMessagesContainer.scrollTop = (this.el.panelMessagesContainer.scrollHeight - this.el.panelMessagesContainer.offsetHeight);
 
-    notification(data){
-
-        if(Notification.permission ==='granted' && !this._active){
-
-            let n = new Notification(this._contactActive.name, {
-                icon: this._contactActive.photo,
-                body: data.content
-            });
-
-            let alert = new Audio('./audio/alert.mp3');
-            alert.currentTime = 0;
-            alert.play();
-
-            setTimeout(()=>{
-
-                if(n){
-
-                    n.close();
+                } else {
+                    this.el.panelMessagesContainer.scrollTop = scrollTop; 
 
                 }
-
-            }, 3000)
-
-
+            });
 
         }
-
-    }
-   
+        
 }
